@@ -3,33 +3,35 @@ package br.com.fiap.territorio.dominio;
 import br.com.fiap.territorio.SistemaMonitoramento;
 import br.com.fiap.territorio.excecao.DadosInvalidosException;
 import br.com.fiap.territorio.excecao.FonteIndisponivelException;
-import br.com.fiap.territorio.persistencia.MedicaoRepository;
+import br.com.fiap.territorio.servico.ServicoMonitoramento;
+import java.util.Optional;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
 public class DemoTemporario {
 
 	private static final String ID_SENSOR = "PLUV-01";
-	private static final int QUANTIDADE_LEITURAS = 3;
-	private static final double VALOR_FORA_DA_FAIXA = 200.0;
+	private static final String ID_SENSOR_SEM_HISTORICO = "PLUV-02";
+	private static final int QUANTIDADE_LEITURAS = 6;
 
 	public static void main(String[] args) {
 		ConfigurableApplicationContext contexto = SpringApplication.run(SistemaMonitoramento.class, args);
-		MedicaoRepository repositorio = contexto.getBean(MedicaoRepository.class);
+		ServicoMonitoramento servico = contexto.getBean(ServicoMonitoramento.class);
 		PluviometroSensor sensor = new PluviometroSensor(ID_SENSOR);
 
 		for (int i = 0; i < QUANTIDADE_LEITURAS; i++) {
-			executar(() -> repositorio.save(new Medicao(sensor, sensor.lerValor())));
+			executar(() -> imprimirMedicao(servico.registrarLeitura(sensor)));
 		}
+		executar(() -> imprimirAnalise(servico.analisar(sensor)));
 
-		executar(() -> repositorio.save(new Medicao(sensor, VALOR_FORA_DA_FAIXA)));
+		executar(() -> imprimirAnalise(servico.analisar(new PluviometroSensor(ID_SENSOR_SEM_HISTORICO))));
 
 		sensor.setAtivo(false);
-		executar(() -> repositorio.save(new Medicao(sensor, sensor.lerValor())));
+		executar(() -> imprimirMedicao(servico.registrarLeitura(sensor)));
 
-		System.out.println("Historico de " + ID_SENSOR + ":");
-		for (Medicao medicao : repositorio.findBySensorIdOrderByDataHoraAsc(ID_SENSOR)) {
-			imprimir(medicao);
+		System.out.println("Alertas emitidos:");
+		for (Alerta alerta : servico.listarAlertas()) {
+			System.out.println("#" + alerta.getId() + " | " + alerta.getNivel() + " | " + alerta.getMensagem());
 		}
 	}
 
@@ -43,8 +45,16 @@ public class DemoTemporario {
 		}
 	}
 
-	private static void imprimir(Medicao medicao) {
-		System.out.println("#" + medicao.getId() + " | " + medicao.getSensorId() + " | " + medicao.getTipo() + " | "
+	private static void imprimirMedicao(Medicao medicao) {
+		System.out.println("Leitura #" + medicao.getId() + " | " + medicao.getSensorId() + " | "
 				+ medicao.getValor() + " mm/h | " + medicao.getDataHora());
+	}
+
+	private static void imprimirAnalise(Optional<Alerta> alerta) {
+		if (alerta.isPresent()) {
+			System.out.println("Analise: " + alerta.get().getNivel() + " - " + alerta.get().getMensagem());
+		} else {
+			System.out.println("Analise: sem alerta");
+		}
 	}
 }
