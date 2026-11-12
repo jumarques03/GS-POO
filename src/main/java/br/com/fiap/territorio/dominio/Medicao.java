@@ -1,14 +1,26 @@
 package br.com.fiap.territorio.dominio;
 
 import br.com.fiap.territorio.excecao.DadosInvalidosException;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalDateTime;
 
+@Entity
 public class Medicao {
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 	private String sensorId;
 	private String tipo;
 	private double valor;
 	private LocalDateTime dataHora;
+
+	// Exigido pelo JPA para recriar o objeto a partir de uma linha lida do banco.
+	protected Medicao() {
+	}
 
 	// O valor deve estar na unidade do sensor (pluviometro: mm/h).
 	public Medicao(Sensor sensor, double valor) {
@@ -31,6 +43,10 @@ public class Medicao {
 			throw new DadosInvalidosException("Medicao fora da faixa: " + sensor.getTipo() + " registrou " + valor
 					+ " (faixa valida: " + sensor.getFaixaMinima() + " a " + sensor.getFaixaMaxima() + ")");
 		}
+	}
+
+	public Long getId() {
+		return id;
 	}
 
 	public String getSensorId() {
