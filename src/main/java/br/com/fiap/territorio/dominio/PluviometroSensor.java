@@ -5,10 +5,11 @@ import java.util.Random;
 
 public class PluviometroSensor implements Sensor {
 
+	public static final String TIPO = "PLUVIOMETRO";
+
 	// Faixa de chuva em mm/h (milimetros por hora).
 	private static final double FAIXA_MIN = 0.0;
 	private static final double FAIXA_MAX = 150.0;
-	private static final String TIPO = "PLUVIOMETRO";
 	private static final double ESCALA_UMA_CASA = 10.0;
 
 	private final String id;
@@ -44,6 +45,7 @@ public class PluviometroSensor implements Sensor {
 		return ativo;
 	}
 
+	@Override
 	public void setAtivo(boolean ativo) {
 		this.ativo = ativo;
 	}

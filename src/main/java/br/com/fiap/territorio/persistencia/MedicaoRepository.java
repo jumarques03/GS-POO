@@ -8,6 +8,6 @@ public interface MedicaoRepository extends JpaRepository<Medicao, Long> {
 
 	List<Medicao> findBySensorIdOrderByDataHoraAsc(String sensorId);
 
-	// O 5 do nome deve acompanhar EstrategiaPrevisao.MINIMO_LEITURAS: o Spring nao aceita constante aqui.
-	List<Medicao> findTop5BySensorIdOrderByDataHoraDesc(String sensorId);
+	// 10 = duas janelas de 5 leituras, o maior historico que uma estrategia usa (PrevisaoComparacao).
+	List<Medicao> findTop10BySensorIdOrderByDataHoraDesc(String sensorId);
 }

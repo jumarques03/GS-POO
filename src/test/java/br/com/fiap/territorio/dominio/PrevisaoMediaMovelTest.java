@@ -28,6 +28,21 @@ class PrevisaoMediaMovelTest {
 	}
 
 	@Test
+	void deveUsarApenasAsCincoLeiturasMaisRecentes() {
+		// Arrange
+		PrevisaoMediaMovel previsao = new PrevisaoMediaMovel();
+		List<Medicao> historico = List.of(new Medicao(sensor, 10.0), new Medicao(sensor, 20.0),
+				new Medicao(sensor, 30.0), new Medicao(sensor, 40.0), new Medicao(sensor, 50.0),
+				new Medicao(sensor, 150.0), new Medicao(sensor, 150.0));
+
+		// Act
+		double resultado = previsao.prever(historico);
+
+		// Assert
+		assertEquals(30.0, resultado, DELTA);
+	}
+
+	@Test
 	void deveLancarDadosInvalidosExceptionQuandoMenosDeCincoLeituras() {
 		// Arrange
 		PrevisaoMediaMovel previsao = new PrevisaoMediaMovel();
